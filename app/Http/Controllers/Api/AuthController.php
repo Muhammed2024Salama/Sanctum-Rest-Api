@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Helper\ResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Exception;
 use http\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-
-
     /**
      * Register new user.
      */
@@ -45,32 +45,51 @@ class AuthController extends Controller
             \Log::error('Unable to Register User : ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
 
             return ResponseHelper::error(
-                message: 'Unable To Register user Please try again !',
-                statusCode: 400);
+                message: 'Unable To Register user Please try again !' . $e->getMessage(),
+                statusCode: 500);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function login(LoginRequest $request)
     {
-        //
-    }
+        // dd($request->all());
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        try {
+            /**
+             * if credentials are incorrect
+             */
+            if (!Auth::attempt([
+                'email' => $request->email,
+                'password' => $request->password
+            ])) {
+                return ResponseHelper::error(
+                    message: 'Unable To Login ! due to invalid credentials ',
+                    statusCode: 400);
+            }
+            $user = Auth::user();
+
+            /**
+             * Create Api Token
+             */
+            $token = $user->createToken('My Api Token ')->plainTextToken;
+
+            $authUser = [
+                'user' => $user,
+                'token' => $token
+            ];
+            return ResponseHelper::success(
+                message: 'You are Logged in Successfully !',
+                data: $authUser,
+                statusCode: 200);
+        } catch (Exception $e) {
+            \Log::error('Unable to Login User : ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+
+            return ResponseHelper::error(
+                message: 'Unable To Login ! Please try again !' . $e->getMessage(),
+                statusCode: 500);
+        }
     }
 }
