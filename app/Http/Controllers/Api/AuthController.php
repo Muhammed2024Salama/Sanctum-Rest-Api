@@ -121,4 +121,27 @@ class AuthController extends Controller
                 statusCode: 500);
         }
     }
+
+    public function userLogout()
+    {
+        try {
+            $user = Auth::user();
+            if ($user) {
+                $user->currentAccessToken()->delete();
+                return ResponseHelper::success(
+                    message: 'User Logged out Successfully !',
+                    statusCode: 200);
+            }
+            return ResponseHelper::error(
+                message: 'Unable log out ! due to invalid token ',
+                statusCode: 400);
+
+        } catch (Exception $e) {
+            \Log::error('Unable To Logout Due to some exception :' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+
+            return ResponseHelper::error(
+                message: 'Unable To Logout Due to some exception ! Please try again !' . $e->getMessage(),
+                statusCode: 500);
+        }
+    }
 }
