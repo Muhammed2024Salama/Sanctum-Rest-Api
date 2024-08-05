@@ -9,6 +9,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Exception;
 use http\Message;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -89,6 +90,34 @@ class AuthController extends Controller
 
             return ResponseHelper::error(
                 message: 'Unable To Login ! Please try again !' . $e->getMessage(),
+                statusCode: 500);
+        }
+    }
+
+    /**
+     * function : Auth User data / Profile Data
+     * @param NA
+     * @return JsonResponse
+     */
+    public function userProfile()
+    {
+        try {
+            $user = Auth::user();
+            if ($user) {
+                return ResponseHelper::success(
+                    message: 'User Profile Fetched Successfully !',
+                    data: $user,
+                    statusCode: 200);
+            }
+            return ResponseHelper::error(
+                message: 'Unable fetch user data ! due to invalid token ',
+                statusCode: 400);
+
+        } catch (Exception $e) {
+            \Log::error('Unable To Fetch User Profile Data ' . $e->getMessage() . ' - Line no. ' . $e->getLine());
+
+            return ResponseHelper::error(
+                message: 'Unable To Fetch User Profile Data ! Please try again !' . $e->getMessage(),
                 statusCode: 500);
         }
     }

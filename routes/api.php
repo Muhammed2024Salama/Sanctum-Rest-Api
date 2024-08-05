@@ -4,14 +4,15 @@ use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /**
- * name
- * email
- * password
- * phone_number
- * it comes from user migrations table
+ * Authentication Routes
+ * These routes are used for user registration, login, and profile management.
+ * Fields such as name, email, password, and phone_number are derived from the user migrations table.
  */
-Route::controller(AuthController::class)->group(function (){
-    Route::post('register','register');
-    Route::post('login','login');
+Route::controller(AuthController::class)->group(function () {
+    Route::post('register', 'register');
+    Route::post('login', 'login');
 
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('user', 'userProfile');
+    });
 });
